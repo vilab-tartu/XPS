@@ -1,7 +1,7 @@
 
 # coding: utf-8
 
-# In[152]:
+# In[1]:
 
 
 import numpy as np
@@ -14,7 +14,7 @@ import sys
 from io import StringIO
 
 
-# In[ ]:
+# In[2]:
 
 
 def process_command_line(argv):
@@ -41,7 +41,7 @@ def process_command_line(argv):
     return parser.parse_args(argv)
 
 
-# In[130]:
+# In[3]:
 
 
 #Function used for calculating binding energies of carbons' electron's for XPS spectra
@@ -52,7 +52,6 @@ def process_command_line(argv):
 def fun(Z, c): 
     chg, corr = Z
     return 13.45*np.asarray(chg)+14.4*np.asarray(corr)+c
-
 
 #Function for estimating the correction electrostatic potential of the other atoms to carbon's BE
 #Arguments
@@ -76,14 +75,18 @@ def CalculateCorrCharge(coordinates, DDEC):
     return corrections
 
 
-# In[131]:
+# In[5]:
 
+
+###########Testing
+
+class test:
+    def __init__(self, filename, alkylc):
+        self.i = filename
+        self.c = alkylc
 
 args = process_command_line(sys.argv[1:])
-
-
-#filename = "DDEC6_even_tempered_net_atomic_charges.xyz"
-#alkyl_index = 1
+#args = test("DDEC6_even_tempered_net_atomic_charges.xyz", "0")
 ####################
 
 file = open(args.i, 'r')
@@ -95,7 +98,6 @@ for i in range(nr_of_atoms): #Read in rows of geometry
     line = file.readline()
     data+=line
     
-
 #First column is atom type, second x-coord, third y-coord, fourth z-coord, fifth DDEC partial charge
 data1 = StringIO(data)    #String to behave like IO object
 atomtype = np.loadtxt(data1, delimiter=' ', usecols=(0), dtype='str') #Atom types
@@ -106,39 +108,37 @@ coordsCharge = np.loadtxt(data1, usecols=(1,2,3,4)) #Coordinates and charges
 
 energy_correction = CalculateCorrCharge(np.r_[[coordsCharge[:,0]], [coordsCharge[:,1]], [coordsCharge[:,2]]], coordsCharge[:,3])
 
-
-
 #Create a dataframe for easier manipulation
 df=pd.DataFrame({'Atom' : atomtype, 'x': coordsCharge[:,0], 'y': coordsCharge[:,1], 'z': coordsCharge[:,2],'charge': coordsCharge[:,3], 'correction': energy_correction})
 carbons = df[df['Atom']=='C'] #Select carbons from there
-alkyl_carbon = carbons.iloc[int(args.c)] #Select alkylic carbon
-
-#Alkylic carbon's energy is 285 eV
-
-#Find the constant value
-popt, pcov = curve_fit(fun, [alkyl_carbon['charge'], alkyl_carbon['correction']], 285)
+if type(args.c)==type(None):
+    popt, pcov = curve_fit(fun, [carbons['charge'].loc[0], carbons['correction'].loc[0]], fun([carbons['charge'].loc[0]]+[carbons['correction'].loc[0]], 0))
+else:
+    #Alkylic carbon's energy is 285 eV
+    alkyl_carbon = carbons.loc[int(args.c)] #Select alkylic carbon
+    #Find the constant value
+    popt, pcov = curve_fit(fun, [alkyl_carbon['charge'], alkyl_carbon['correction']], 285)
 #Estimate the BE values by using the function
 #print("Constant value is: " + str(popt))
 BEs = fun([list(carbons['charge'])]+[list(carbons['correction'])], *popt) #Using function to estimate BEs
 
 
-
-# In[147]:
+# In[8]:
 
 
 #Create arbitrary X-axis
-BE_axis = np.linspace(284,289,100) #eV
+BE_axis = np.linspace(min(BEs)-1,max(BEs)+1,100) #eV
 
 #Create intenstity Y-axis
 arb_intensity = np.zeros(len(BE_axis))
 
 #Way to find indexes of points, where set intensity 1
-indexes = np.round((np.sort(BEs)-284)/(abs(289-284)/100))
+indexes = np.round((np.sort(BEs)-min(BE_axis))/(abs(max(BE_axis)-min(BE_axis))/len(BE_axis)))
 for i in indexes:
     arb_intensity[int(i)] = 1
 
 
-# In[172]:
+# In[9]:
 
 
 #Plotting
