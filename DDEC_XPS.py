@@ -127,7 +127,9 @@ BEs = fun([list(carbons['charge'])]+[list(carbons['correction'])], *popt) #Using
 
 
 #Create arbitrary X-axis
-BE_axis = np.linspace(min(BEs)-1,max(BEs)+1,100) #eV
+N_points = 500
+BE_sigma = N_points/(max(BEs)-min(BEs)+2)*0.2 #sigma of 0.2 eV
+BE_axis = np.linspace(min(BEs)-1,max(BEs)+1,N_points) #eV
 
 #Create intenstity Y-axis
 arb_intensity = np.zeros(len(BE_axis))
@@ -142,15 +144,17 @@ for i in indexes:
 
 
 #Plotting
-f1, (ax) = plt.subplots(1, 1, sharey=False,sharex=True, figsize=(8.3, 8.3))
+f1, (ax) = plt.subplots(1, 1, sharey=False,sharex=True, figsize=(8.3/2.54, 8.3/2.54))
 f1.subplots_adjust(hspace=0)
 
-ax.plot(BE_axis, gaussian_filter(arb_intensity, 2), 'k')
+ax.plot(BE_axis, gaussian_filter(arb_intensity, BE_sigma), 'k')
 ax.set_yticklabels([])
-ax.tick_params(axis='both',labelsize=14)
+ax.tick_params(axis='both',labelsize=7)
 
-ax.set_xlabel('BEs [eV]',fontsize=16)
-ax.set_ylabel('Intensity [arb. units]',fontsize=16)
+ax.set_xlabel('BEs [eV]',fontsize=9)
+ax.set_ylabel('Intensity [arb. units]',fontsize=9)
 
-f1.savefig(args.i.split(".")[0]+".png", format="png", dpi=300, bbox_inches='tight')
+f1.savefig(args.i.split(".")[0]+".png", format="png", dpi=300)
+f1.savefig(args.i.split(".")[0]+".svg", format="svg")
 
+#Save data to file
