@@ -11,6 +11,7 @@ from scipy.optimize import curve_fit
 import matplotlib.pyplot as plt
 import argparse
 import sys
+import csv
 from io import StringIO
 
 
@@ -157,4 +158,17 @@ ax.set_ylabel('Intensity [arb. units]',fontsize=9)
 f1.savefig(args.i.split(".")[0]+".png", format="png", dpi=300)
 f1.savefig(args.i.split(".")[0]+".svg", format="svg")
 
+
+# In[10]:
+
+
 #Save data to file
+with open(args.i.split(".")[0]+"_BE.dat", 'w') as f:
+   writer = csv.writer(f, delimiter='\t')
+   writer.writerows(zip(BEs))
+f.close()
+
+with open(args.i.split(".")[0]+"_spec.dat", 'w') as g:
+   writer = csv.writer(g, delimiter='\t')
+   writer.writerows(zip(BE_axis,gaussian_filter(arb_intensity, BE_sigma)))
+g.close()
