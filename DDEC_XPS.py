@@ -113,7 +113,8 @@ energy_correction = CalculateCorrCharge(np.r_[[coordsCharge[:,0]], [coordsCharge
 df=pd.DataFrame({'Atom' : atomtype, 'x': coordsCharge[:,0], 'y': coordsCharge[:,1], 'z': coordsCharge[:,2],'charge': coordsCharge[:,3], 'correction': energy_correction})
 carbons = df[df['Atom']=='C'] #Select carbons from there
 if type(args.c)==type(None):
-    popt, pcov = curve_fit(fun, [carbons['charge'].iloc[0], carbons['correction'].iloc[0]], fun([carbons['charge'].iloc[0]]+[carbons['correction'].iloc[0]], 0))
+#    popt, pcov = curve_fit(fun, [carbons['charge'].iloc[0], carbons['correction'].iloc[0]], fun([carbons['charge'].iloc[0]]+[carbons['correction'].iloc[0]], 0))
+    popt, pcov = curve_fit(fun, [0, 0], 285)
 else:
     #Alkylic carbon's energy is 285 eV
     alkyl_carbon = carbons.loc[int(args.c)] #Select alkylic carbon
