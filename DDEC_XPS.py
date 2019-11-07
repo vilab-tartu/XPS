@@ -117,7 +117,7 @@ if type(args.c)==type(None):
     popt, pcov = curve_fit(fun, [0, 0], 285)
 else:
     #Alkylic carbon's energy is 285 eV
-    alkyl_carbon = carbons.loc[int(args.c)] #Select alkylic carbon
+    alkyl_carbon = carbons.iloc[int(args.c)] #Select alkylic carbon
     #Find the constant value
     popt, pcov = curve_fit(fun, [alkyl_carbon['charge'], alkyl_carbon['correction']], 285)
 #Estimate the BE values by using the function
