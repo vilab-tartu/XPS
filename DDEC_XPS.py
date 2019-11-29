@@ -84,8 +84,8 @@ class test:
 ######################### Main excecution starts here ###################################
 
 
-args = process_command_line(sys.argv[1:])
-#args = test("DDEC6_even_tempered_net_atomic_charges.xyz", "0")
+#args = process_command_line(sys.argv[1:])
+args = test("DDEC6_even_tempered_net_atomic_charges.xyz", "0")
 
 
 file = open(args.i, 'r')
@@ -112,6 +112,8 @@ energy_correction = CalculateCorrCharge(np.r_[[coordsCharge[:, 0]], [coordsCharg
 df = pd.DataFrame({'Atom': atomtype, 'x': coordsCharge[:, 0], 'y': coordsCharge[:, 1], 'z': coordsCharge[:, 2],
                    'charge': coordsCharge[:, 3], 'correction': energy_correction})
 carbons = df[df['Atom'] == 'C']  # Select carbons from there
+carbonIndexes = np.asarray(df.index)
+carbonIndexes = carbonIndexes[df['Atom'] == 'C'] #Carbon indexes
 if type(args.c) == type(None):
     popt, pcov = curve_fit(fun, [carbons['charge'].iloc[0], carbons['correction'].iloc[0]],
                            fun([carbons['charge'].iloc[0]] + [carbons['correction'].iloc[0]], 0))
@@ -149,3 +151,7 @@ ax.set_ylabel('Intensity [arb. units]', fontsize=12)
 f1.savefig(args.i.split(".")[0] + ".png", format="png", dpi=300, bbox_inches='tight')
 f1.savefig(args.i.split(".")[0] + ".svg", format="svg")
 np.savetxt(args.i.split(".")[0] + ".csv", list(zip(BE_axis, gaussian_filter(arb_intensity, 2))), delimiter=',')
+#print(df)
+df = pd.DataFrame(BEs, columns=["BE [eV]"], index=carbonIndexes)
+df.index.name = "Atom IX"
+df.to_csv("IndexesBEs.csv")
