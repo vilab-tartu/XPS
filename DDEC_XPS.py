@@ -85,7 +85,7 @@ class test:
 
 
 #args = process_command_line(sys.argv[1:])
-args = test("DDEC6_even_tempered_net_atomic_charges.xyz", "0")
+args = test("DDEC6_even_tempered_net_atomic_charges.xyz", None)
 
 
 file = open(args.i, 'r')
@@ -115,16 +115,17 @@ carbons = df[df['Atom'] == 'C']  # Select carbons from there
 carbonIndexes = np.asarray(df.index)
 carbonIndexes = carbonIndexes[df['Atom'] == 'C'] #Carbon indexes
 if type(args.c) == type(None):
-    popt, pcov = curve_fit(fun, [carbons['charge'].iloc[0], carbons['correction'].iloc[0]],
-                           fun([carbons['charge'].iloc[0]] + [carbons['correction'].iloc[0]], 0))
+    #If no alcylic carbon given do not fit anything, just calculate BE values using data and auxilliary variable 0
+    BEs = fun([list(carbons['charge'])] + [list(carbons['correction'])], 0)
+
 else:
     # Alkylic carbon's energy is 285 eV
     alkyl_carbon = carbons.iloc[int(args.c)]  # Select alkylic carbon
     # Find the constant value
     popt, pcov = curve_fit(fun, [alkyl_carbon['charge'], alkyl_carbon['correction']], 285)
-# Estimate the BE values by using the function
-# print("Constant value is: " + str(popt))
-BEs = fun([list(carbons['charge'])] + [list(carbons['correction'])], *popt)  # Using function to estimate BEs
+    # Estimate the BE values by using the function and optimized constant
+    # print("Constant value is: " + str(popt))
+    BEs = fun([list(carbons['charge'])] + [list(carbons['correction'])], *popt)  # Using function to estimate BEs
 
 # Create arbitrary X-axis
 BE_axis = np.linspace(min(BEs) - 1, max(BEs) + 1, 100)  # eV
@@ -141,17 +142,17 @@ for i in indexes:
 f1, (ax) = plt.subplots(1, 1, sharey=False, sharex=True, figsize=(8.3 / 2.54, 8.3 / 2.54))
 f1.subplots_adjust(hspace=0)
 
-ax.plot(BE_axis, gaussian_filter(arb_intensity, 2), 'k')
+ax.plot(BE_axis, gaussian_filter(arb_intensity, 0.5), 'k')
 ax.set_yticklabels([])
 ax.tick_params(axis='both', labelsize=9)
 
 ax.set_xlabel('BEs [eV]', fontsize=12)
 ax.set_ylabel('Intensity [arb. units]', fontsize=12)
 
-f1.savefig(args.i.split(".")[0] + ".png", format="png", dpi=300, bbox_inches='tight')
-f1.savefig(args.i.split(".")[0] + ".svg", format="svg")
-np.savetxt(args.i.split(".")[0] + ".csv", list(zip(BE_axis, gaussian_filter(arb_intensity, 2))), delimiter=',')
+f1.savefig("spectra" + ".png", format="png", dpi=300, bbox_inches='tight')
+f1.savefig("spectra" + ".svg", format="svg")
+np.savetxt("spectra" + ".csv", list(zip(BE_axis, gaussian_filter(arb_intensity, 2))), delimiter=',')
 #print(df)
 df = pd.DataFrame(BEs, columns=["BE [eV]"], index=carbonIndexes)
 df.index.name = "Atom IX"
-df.to_csv("IndexesBEs.csv")
+df.to_csv("BEs.csv")
