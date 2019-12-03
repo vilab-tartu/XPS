@@ -142,6 +142,8 @@ for i in indexes:
 f1, (ax) = plt.subplots(1, 1, sharey=False, sharex=True, figsize=(8.3 / 2.54, 8.3 / 2.54))
 f1.subplots_adjust(hspace=0)
 
+addToFilename = args.i.split(".")[0]
+
 ax.plot(BE_axis, gaussian_filter(arb_intensity, 0.5), 'k')
 ax.set_yticklabels([])
 ax.tick_params(axis='both', labelsize=9)
@@ -149,10 +151,10 @@ ax.tick_params(axis='both', labelsize=9)
 ax.set_xlabel('BEs [eV]', fontsize=12)
 ax.set_ylabel('Intensity [arb. units]', fontsize=12)
 
-f1.savefig("spectra" + ".png", format="png", dpi=300, bbox_inches='tight')
-f1.savefig("spectra" + ".svg", format="svg")
-np.savetxt("spectra" + ".csv", list(zip(BE_axis, gaussian_filter(arb_intensity, 2))), delimiter=',')
+f1.savefig(addToFilename+"_spectra.png", format="png", dpi=300, bbox_inches='tight')
+f1.savefig(addToFilename+"_spectra.svg", format="svg")
+np.savetxt(addToFilename+"_spectra.csv", list(zip(BE_axis, gaussian_filter(arb_intensity, 2))), delimiter=',')
 #print(df)
 df = pd.DataFrame(BEs, columns=["BE [eV]"], index=carbonIndexes)
 df.index.name = "Atom IX"
-df.to_csv("BEs.csv")
+df.to_csv(addToFilename+"_BE.csv")
