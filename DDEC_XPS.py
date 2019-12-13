@@ -166,8 +166,8 @@ ax.set_ylabel('intensity [arb. units]', fontsize=12)
 
 f1.savefig(addToFilename+"_spectra.png", format="png", dpi=300, bbox_inches='tight')
 f1.savefig(addToFilename+"_spectra.svg", format="svg")
-np.savetxt(addToFilename+"_spectra.csv", list(zip(BE_axis, gaussian_filter(gsn_intensity, 2))), delimiter=',')
-#print(df)
+np.savetxt(addToFilename+"_spectra.csv", list(zip(BE_axis, gsn_intensity)), delimiter=',')
+
 df = pd.DataFrame(BEs, columns=["BE [eV]"], index=carbonIndexes)
 df.index.name = "Atom IX"
 df.to_csv(addToFilename+"_BE.csv")
