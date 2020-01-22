@@ -72,6 +72,12 @@ def CalculateCorrCharge(coordinates, DDEC):
 
     return corrections
 
+"""
+    Gaussian function
+"""
+
+def gaussian(x, m, s):
+    return np.exp(-np.power((x - m), 2.) / (2 * np.power(s, 2.)))
 
 """
     Method for testing giving filename instead of command line excecution
@@ -84,9 +90,8 @@ class test:
 ######################### Main excecution starts here ###################################
 
 
-#args = process_command_line(sys.argv[1:])
-args = test("DDEC6_even_tempered_net_atomic_charges.xyz", None)
-
+args = process_command_line(sys.argv[1:])
+#args = test("DDEC6_even_tempered_net_atomic_charges.xyz", None)
 
 file = open(args.i, 'r')
 line = file.readline()  # readline
@@ -128,15 +133,22 @@ else:
     BEs = fun([list(carbons['charge'])] + [list(carbons['correction'])], *popt)  # Using function to estimate BEs
 
 # Create arbitrary X-axis
-BE_axis = np.linspace(min(BEs) - 1, max(BEs) + 1, 100)  # eV
+n = 1000
+BE_axis = np.linspace(min(BEs) - 1, max(BEs) + 1, n)  # eV
 
 # Create intenstity Y-axis
 arb_intensity = np.zeros(len(BE_axis))
+gsn_intensity = np.zeros(len(BE_axis))
 
 # Way to find indexes of points, where set intensity 1
 indexes = np.round((np.sort(BEs) - min(BE_axis)) / (abs(max(BE_axis) - min(BE_axis)) / len(BE_axis)))
 for i in indexes:
     arb_intensity[int(i)] += 1
+
+# Smearing the spectra using Gaussian function
+s = 0.25 #eV
+for i in range(len(arb_intensity)):
+    gsn_intensity[i] = sum([gaussian(BE_axis[i], BE_axis[int(j)], s) for j in indexes])
 
 # Plotting and saving data
 f1, (ax) = plt.subplots(1, 1, sharey=False, sharex=True, figsize=(8.3 / 2.54, 8.3 / 2.54))
@@ -144,17 +156,18 @@ f1.subplots_adjust(hspace=0)
 
 addToFilename = args.i.split(".")[0]
 
-ax.plot(BE_axis, gaussian_filter(arb_intensity, 0.5), 'k')
-ax.set_yticklabels([])
+ax.plot(BE_axis, gsn_intensity, 'k')
+ax.plot(BE_axis, arb_intensity, 'g')
+#ax.set_yticklabels([])
 ax.tick_params(axis='both', labelsize=9)
 
-ax.set_xlabel('BEs [eV]', fontsize=12)
-ax.set_ylabel('Intensity [arb. units]', fontsize=12)
+ax.set_xlabel('bonding energy [eV]', fontsize=12)
+ax.set_ylabel('intensity [arb. units]', fontsize=12)
 
 f1.savefig(addToFilename+"_spectra.png", format="png", dpi=300, bbox_inches='tight')
 f1.savefig(addToFilename+"_spectra.svg", format="svg")
-np.savetxt(addToFilename+"_spectra.csv", list(zip(BE_axis, gaussian_filter(arb_intensity, 2))), delimiter=',')
-#print(df)
+np.savetxt(addToFilename+"_spectra.csv", list(zip(BE_axis, gsn_intensity)), delimiter=',')
+
 df = pd.DataFrame(BEs, columns=["BE [eV]"], index=carbonIndexes)
 df.index.name = "Atom IX"
 df.to_csv(addToFilename+"_BE.csv")
