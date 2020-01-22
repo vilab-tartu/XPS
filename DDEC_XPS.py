@@ -136,7 +136,7 @@ arb_intensity = np.zeros(len(BE_axis))
 # Way to find indexes of points, where set intensity 1
 indexes = np.round((np.sort(BEs) - min(BE_axis)) / (abs(max(BE_axis) - min(BE_axis)) / len(BE_axis)))
 for i in indexes:
-    arb_intensity[int(i)] = 1
+    arb_intensity[int(i)] += 1
 
 # Plotting and saving data
 f1, (ax) = plt.subplots(1, 1, sharey=False, sharex=True, figsize=(8.3 / 2.54, 8.3 / 2.54))
