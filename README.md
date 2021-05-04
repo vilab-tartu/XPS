@@ -25,4 +25,4 @@ Creates a carbons' XPS spectra from a given DDEC6 analysis input file also allow
 
 #### Use example
 
-``` python Interface_DDEC_XPS.py -i DDEC6_-05.xyz -xyz Gr_-05_EMImBF4-4050.xyz -cell 34.08,34.433,50 -superCell 3,3,1 -slices 0,20,30,40```
+``` python Interface_DDEC_XPS.py -i DDEC6_+05.xyz -xyz Gr_+05_EMImBF4-4621.xyz -cell 34.08,34.433,50 -superCell 3,3,1 -slices 0,20,30,40```
